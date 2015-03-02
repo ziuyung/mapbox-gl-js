@@ -8,11 +8,11 @@ module.exports = {
     fade: fadePlacementLayers
 };
 
-function mergePlacementLayers(oldPlacementBuffers, newPlacementBuffers, oldBuffers, transform, oldTileID, newTileID) {
+function mergePlacementLayers(oldPlacementBuffers, newPlacementBuffers, oldBuffers, transform, oldTileID, newTileID, maxzoom) {
 
     var blockerPos = TileCoord.fromID(oldTileID);
     var blockeePos = TileCoord.fromID(newTileID);
-    var scale = 1 / Math.pow(2, blockerPos.z - blockeePos.z);
+    var scale = 1 / Math.pow(2, Math.min(blockerPos.z, maxzoom) - Math.min(blockeePos.z, maxzoom));
     var translateX = (blockerPos.x * scale - blockeePos.x) * 4096;
     var translateY = (blockerPos.y * scale - blockeePos.y) * 4096;
 
@@ -117,27 +117,19 @@ function mergePlacementLayer(newPlacement, oldPlacement, ubytes, scale, translat
     }
 }
 
-function fadePlacementLayers(oldPlacementLayers, newPlacementLayers, oldBuffers, newBuffers) {
+function fadePlacementLayers(placementLayers, buffers) {
 
-    var newGlyphUbytes = new Uint8Array(newBuffers.glyphFade.array);
-    var oldGlyphUbytes = new Uint8Array(oldBuffers.glyphFade.array);
-    var newIconUbytes = new Uint8Array(newBuffers.iconFade.array);
-    var oldIconUbytes = new Uint8Array(oldBuffers.iconFade.array);
+    var glyphUbytes = new Uint8Array(buffers.glyphFade.array);
+    var iconUbytes = new Uint8Array(buffers.glyphFade.array);
 
-    var sinceOld = Date.now() - oldBuffers.glyphFade.referenceTime;
-    newBuffers.glyphFade.referenceTime = newBuffers.iconFade.referenceTime = Date.now();
-    oldBuffers.glyphFade.referenceTime = oldBuffers.iconFade.referenceTime = Date.now();
+    var sinceOld = Date.now() - buffers.glyphFade.referenceTime;
+    buffers.glyphFade.referenceTime = buffers.iconFade.referenceTime = Date.now();
+    buffers.glyphFade.dirty = true;
+    buffers.iconFade.dirty = true;
 
-    var id;
-
-    for (id in oldPlacementLayers) {
-        //fadePlacementLayer(oldPlacementLayers[id].text, oldGlyphUbytes, sinceOld);
-        //fadePlacementLayer(oldPlacementLayers[id].icon, oldIconUbytes, sinceOld);
-    }
-
-    for (id in newPlacementLayers) {
-        fadePlacementLayer(newPlacementLayers[id].text, newGlyphUbytes, sinceOld);
-        fadePlacementLayer(newPlacementLayers[id].icon, newIconUbytes, sinceOld);
+    for (var id in placementLayers) {
+        fadePlacementLayer(placementLayers[id].text, glyphUbytes, sinceOld);
+        fadePlacementLayer(placementLayers[id].icon, iconUbytes, sinceOld);
     }
 }
 
@@ -181,7 +173,7 @@ function fadePlacementLayer(placementLayer, ubytes, sinceOld) {
                 throw "unreachable";
             }
 
-        } else if (oldToOpacity === 1) {
+        } else if (oldToOpacity === 255) {
             if (fadeType === fadeOut) {
                 startTime = 0;
                 fromOpacity = currentOpacity;
@@ -213,7 +205,7 @@ function fadePlacementLayer(placementLayer, ubytes, sinceOld) {
         for (var v = 0; v < vertexLength; v++) {
             ubytes[(vertexOffset + v) * 4 + 1] = fromOpacity;
             ubytes[(vertexOffset + v) * 4 + 2] = toOpacity;
-            ubytes[(vertexOffset + v) * 4 + 3] = startTime;
+            ubytes[(vertexOffset + v) * 4 + 3] = Math.min(255, startTime);
         }
     }
 }

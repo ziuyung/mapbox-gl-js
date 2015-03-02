@@ -4,6 +4,7 @@ var util = require('../util/util');
 var Evented = require('../util/evented');
 var TileCoord = require('./tile_coord');
 var Source = require('./source');
+var combinePlacementLayers = require('../placement/fade_placement_layer');
 
 module.exports = VectorTileSource;
 
@@ -24,6 +25,7 @@ VectorTileSource.prototype = util.inherit(Evented, {
     maxzoom: 22,
     tileSize: 512,
     reparseOverscaled: true,
+    fadeDuration: 3000,
     _loaded: false,
 
     onAdd: function(map) {
@@ -37,6 +39,7 @@ VectorTileSource.prototype = util.inherit(Evented, {
     update: function(transform) {
         if (this._pyramid) {
             this._pyramid.update(this.used, transform);
+            this.placementsDirty = true;
         }
     },
 
@@ -53,7 +56,10 @@ VectorTileSource.prototype = util.inherit(Evented, {
     },
 
     render: function() {
-        this._mergeTilePlacements();
+        if (this.placementsDirty) {
+            this._mergeTilePlacements();
+            this.placementsDirty = false;
+        }
         Source._renderTiles.apply(this, arguments);
     },
 
@@ -88,6 +94,8 @@ VectorTileSource.prototype = util.inherit(Evented, {
             this.fire('tile.error', {tile: tile});
             return;
         }
+
+        this.placementsDirty = true;
 
         tile.loadVectorData(data);
         this.fire('tile.load', {tile: tile});
@@ -126,7 +134,6 @@ VectorTileSource.prototype = util.inherit(Evented, {
 
     _mergeTilePlacements: function() {
         if (!this._pyramid) return;
-        return;
 
         var ids = this._pyramid.renderedIDs().reverse();
         if (!ids.length) return;
@@ -164,7 +171,8 @@ VectorTileSource.prototype = util.inherit(Evented, {
         }
 
         for (var j = 0; j < ids.length; j++) {
-            // fade j
+            var fadeTile = tileTreeNodes[ids[j]].tile;
+           combinePlacementLayers.fade(fadeTile.symbolFadeBuffers, fadeTile.buffers);
         }
     },
 
@@ -176,9 +184,9 @@ VectorTileSource.prototype = util.inherit(Evented, {
         for (var c = 0; c < children.length; c++) {
             var child = children[c];
             var blocker = childCoversParent ? child.tile : tile;
-            var blockee = childCoversParent ? tile : child.tile;
+            var blocked = childCoversParent ? tile : child.tile;
 
-            // merge placement
+           combinePlacementLayers.merge(blocked.symbolFadeBuffers, blocker.symbolFadeBuffers, blocked.buffers, this.map.transform, blocked.id, blocker.id, this.maxzoom);
 
             this._mergeTilePlacement(child.tile, child.children);
         }

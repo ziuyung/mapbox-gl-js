@@ -13,6 +13,7 @@ function TilePyramid(options) {
     this.minzoom = options.minzoom;
     this.maxzoom = options.maxzoom;
     this.reparseOverscaled = options.reparseOverscaled;
+    this.fadeDuration = options.fadeDuration;
 
     this._load = options.load;
     this._abort = options.abort;
@@ -22,6 +23,7 @@ function TilePyramid(options) {
     this._redoPlacement = options.redoPlacement;
 
     this._tiles = {};
+    this._tilesFadingOut = {};
     this._cache = new Cache(options.cacheSize, function(tile) { return this._unload(tile); }.bind(this));
 }
 
@@ -35,14 +37,14 @@ TilePyramid.prototype = {
     },
 
     orderedIDs: function() {
-        return Object.keys(this._tiles)
+        return Object.keys(this._tiles).concat(Object.keys(this._tilesFadingOut))
             .sort(function(a, b) { return (b % 32) - (a % 32); }) // z-order
             .map(function(id) { return +id; });
     },
 
     renderedIDs: function() {
         return this.orderedIDs().filter(function(id) {
-            return this._tiles[id].loaded && !this._coveredTiles[id];
+            return this.getTile(id).loaded && !this._coveredTiles[id];
         }.bind(this));
     },
 
@@ -54,7 +56,7 @@ TilePyramid.prototype = {
     },
 
     getTile: function(id) {
-        return this._tiles[id];
+        return this._tiles[id] || this._tilesFadingOut[id];
     },
 
     // get the zoom level adjusted for the difference in map and source tilesizes
@@ -177,6 +179,13 @@ TilePyramid.prototype = {
         for (i = 0; i < remove.length; i++) {
             this.removeTile(+remove[i]);
         }
+
+        // remove tiles that have finished fading out
+        for (var f in this._tilesFadingOut) {
+            if (this._tilesFadingOut[f].fadeUntil <= Date.now()) {
+                delete this._tilesFadingOut[f];
+            }
+        }
     },
 
     addTile: function(id) {
@@ -216,6 +225,12 @@ TilePyramid.prototype = {
         tile.uses--;
         delete this._tiles[id];
         this._remove(tile, id);
+
+        if (this.fadeDuration > 0) {
+            console.log('here');
+            tile.fadeUntil = Date.now() + this.fadeDuration;
+            this._tilesFadingOut[id] = tile;
+        }
 
         if (tile.uses > 0)
             return;

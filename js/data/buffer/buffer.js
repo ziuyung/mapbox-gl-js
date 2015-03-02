@@ -38,6 +38,11 @@ Buffer.prototype = {
 
     // binds the buffer to a webgl context
     bind: function(gl) {
+
+        if (this.dirty) {
+            this.destroy(gl);
+            this.buffer = null;
+        }
         var type = gl[this.arrayType];
         if (!this.buffer) {
             this.buffer = gl.createBuffer();

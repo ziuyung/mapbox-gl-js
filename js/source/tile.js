@@ -94,9 +94,11 @@ Tile.prototype = {
 
         var buffers = new BufferSet(data.buffers);
 
+        return;
 
         combinePlacementLayers.merge(this.symbolFadeBuffers, data.symbolFadeBuffers, this.buffers, painter.transform, this.id, this.id);
-        combinePlacementLayers.fade(this.symbolFadeBuffers, data.symbolFadeBuffers, this.buffers, buffers);
+        combinePlacementLayers.fade(this.symbolFadeBuffers, this.buffers);
+        combinePlacementLayers.fade(data.symbolFadeBuffers, buffers);
 
         this.buffers.glyphVertex.destroy(painter.gl);
         this.buffers.iconVertex.destroy(painter.gl);

@@ -23,6 +23,7 @@ exports._loadTileJSON = function(options) {
             minzoom: this.minzoom,
             maxzoom: this.maxzoom,
             reparseOverscaled: this.reparseOverscaled,
+            fadeDuration: this.fadeDuration,
             load: this._loadTile.bind(this),
             abort: this._abortTile.bind(this),
             unload: this._unloadTile.bind(this),

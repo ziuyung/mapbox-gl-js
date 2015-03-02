@@ -13,6 +13,7 @@ SymbolFadeBuffer.prototype = util.inherit(Buffer, {
     defaultLength: 2048 * 16,
     itemSize: 4,
     retain: true,
+    referenceTime: 0,
 
     add: function(placementZoom, fadeOutTime, fadeInTime) {
         var pos = this.pos;
