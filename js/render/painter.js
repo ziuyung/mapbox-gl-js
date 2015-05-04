@@ -110,6 +110,11 @@ GLPainter.prototype.setup = function() {
         ['u_matrix', 'u_color']
     );
 
+    this.buildingShader = gl.initializeShader('building',
+        ['a_pos', 'a_normal'],
+        ['u_matrix', 'u_color', 'u_lightdir']
+    );
+
     this.collisionBoxShader = gl.initializeShader('collisionbox',
         ['a_pos', 'a_extrude', 'a_data'],
         ['u_matrix', 'u_scale', 'u_zoom', 'u_maxzoom']
@@ -263,6 +268,7 @@ var draw = {
     symbol: require('./draw_symbol'),
     line: require('./draw_line'),
     fill: require('./draw_fill'),
+    building: require('./draw_building'),
     raster: require('./draw_raster'),
     background: require('./draw_background'),
     debug: require('./draw_debug'),

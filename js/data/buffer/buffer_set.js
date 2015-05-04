@@ -10,6 +10,8 @@ var GlyphElementBuffer = require('./triangle_element_buffer');
 var IconVertexBuffer = require('./icon_vertex_buffer');
 var IconElementBuffer = require('./triangle_element_buffer');
 var CollisionBoxVertexBuffer = require('./collision_box_vertex_buffer');
+var BuildingVertexBuffer = require('./building_vertex_buffer');
+var BuildingElementBuffer = require('./triangle_element_buffer');
 
 module.exports = function(bufferset) {
     bufferset = bufferset || {};
@@ -23,6 +25,8 @@ module.exports = function(bufferset) {
         outlineElement: new OutlineElementBuffer(bufferset.outlineElement),
         lineVertex: new LineVertexBuffer(bufferset.lineVertex),
         lineElement: new LineElementBuffer(bufferset.lineElement),
-        collisionBoxVertex: new CollisionBoxVertexBuffer(bufferset.collisionBoxVertex)
+        collisionBoxVertex: new CollisionBoxVertexBuffer(bufferset.collisionBoxVertex),
+        buildingVertex: new BuildingVertexBuffer(bufferset.buildingVertex),
+        buildingElement: new BuildingElementBuffer(bufferset.buildingElement)
     };
 };

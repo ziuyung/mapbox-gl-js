@@ -6,6 +6,7 @@ module.exports = {
     "debug": glify('../../shaders/debug.*.glsl'),
     "dot": glify('../../shaders/dot.*.glsl'),
     "fill": glify('../../shaders/fill.*.glsl'),
+    "building": glify('../../shaders/building.*.glsl'),
     "gaussian": glify('../../shaders/gaussian.*.glsl'),
     "line": glify('../../shaders/line.*.glsl'),
     "linepattern": glify('../../shaders/linepattern.*.glsl'),
