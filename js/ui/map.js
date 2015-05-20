@@ -88,6 +88,10 @@ var Map = module.exports = function(options) {
     if (options.classes) this.setClasses(options.classes);
     if (options.style) this.setStyle(options.style);
     if (options.attributionControl) this.addControl(new Attribution());
+
+    if (typeof window !== 'undefined' && window.mapboxgl) {
+        window.mapboxgl._map = this;
+    }
 };
 
 util.extend(Map.prototype, Evented);
@@ -746,6 +750,9 @@ util.extend(Map.prototype, /** @lends Map.prototype */{
         browser.cancelFrame(this._frameId);
         clearTimeout(this._sourcesDirtyTimeout);
         this.setStyle(null);
+        if (typeof window !== 'undefined' && window.mapboxgl) {
+            delete window.mapboxgl._map;
+        }
         return this;
     },
 
