@@ -217,10 +217,6 @@ WorkerTile.prototype.parse = function(data, layers, actor, callback) {
 
         for (k in buffers) {
             transferables.push(buffers[k].arrayBuffer);
-
-            // The Buffer::push method is generated with "new Function(...)"
-            // and not transferrable.
-            delete buffers[k].push;
         }
 
         for (k in buckets) {

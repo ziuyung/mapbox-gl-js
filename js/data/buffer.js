@@ -63,7 +63,6 @@ function Buffer(options) {
             assert(attribute.type.name in Buffer.AttributeType);
         }
 
-        this._createPushMethod();
         this._refreshViews();
     }
 }
@@ -155,33 +154,22 @@ Buffer.prototype._refreshViews = function() {
     };
 };
 
-Buffer.prototype._createPushMethod = function() {
-    var body = '';
-    var argNames = [];
+Buffer.prototype.push = function() {
+    var index = this.length++,
+        offset = index * this.itemSize;
 
-    body += 'var index = this.length++;\n';
-    body += 'var offset = index * ' + this.itemSize + ';\n';
-    body += 'if (offset + ' + this.itemSize + ' > this.capacity) { this._resize(this.capacity * 1.5); }\n';
+    if (offset + this.itemSize > this.capacity)
+        this._resize(this.capacity * 1.5);
 
-    for (var i = 0; i < this.attributes.length; i++) {
-        var attribute = this.attributes[i];
-        var offsetId = 'offset' + i;
+    for (var i = 0, k = 0; i < this.attributes.length; i++) {
+        var attr = this.attributes[i],
+            attrOffset = (offset + attr.offset) / attr.type.size;
 
-        body += '\nvar ' + offsetId + ' = (offset + ' + attribute.offset + ') / ' + attribute.type.size + ';\n';
-
-        for (var j = 0; j < attribute.components; j++) {
-            var valueId = 'value' + i + '_' + j;
-            var lvalue = 'this.views.' + attribute.type.name + '[' + offsetId + ' + ' + j + ']';
-
-            body += lvalue + ' = ' + valueId + ';\n';
-
-            argNames.push(valueId);
+        for (var j = 0; j < attr.components; j++) {
+            this.views[attr.type.name][attrOffset + j] = arguments[k++];
         }
     }
-
-    body += '\nreturn index;\n';
-
-    this.push = new Function(argNames, body);
+    return index;
 };
 
 /**
