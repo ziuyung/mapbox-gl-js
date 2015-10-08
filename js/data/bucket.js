@@ -108,6 +108,7 @@ Bucket.prototype.populateBuffers = function() {
  * @private
  * @param {string} shaderName the name of the shader associated with the buffer that will receive the vertices
  * @param {number} vertexLength The number of vertices that will be inserted to the buffer.
+ * @returns The current element group
  */
 Bucket.prototype.makeRoomFor = function(shaderName, numVertices) {
     var groups = this.elementGroups[shaderName];
