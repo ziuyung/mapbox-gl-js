@@ -154,7 +154,7 @@ test('TilePyramid#addTile', function(t) {
         t.end();
     });
 
-    t.test('reuses wrapped tile', function(t) {
+    t.test('reuses wrapped tile (when first tile was w == 0)', function(t) {
         var coord = new TileCoord(0, 0, 0),
             load = 0,
             add = 0;
@@ -166,6 +166,25 @@ test('TilePyramid#addTile', function(t) {
 
         var t1 = pyramid.addTile(coord);
         var t2 = pyramid.addTile(new TileCoord(0, 0, 0, 1));
+
+        t.equal(load, 1);
+        t.equal(add, 2);
+        t.equal(t1, t2);
+
+        t.end();
+    });
+
+    t.test('reuses wrapped tile (when first tile was w != 0)', function(t) {
+        var load = 0;
+        var add = 0;
+
+        var pyramid = createPyramid({
+            load: function(tile) { tile.loaded = true; load++; },
+            add: function() { add++; }
+        });
+
+        var t1 = pyramid.addTile(new TileCoord(0, 0, 0, 1));
+        var t2 = pyramid.addTile(new TileCoord(0, 0, 0, 0));
 
         t.equal(load, 1);
         t.equal(add, 2);

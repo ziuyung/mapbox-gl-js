@@ -270,11 +270,19 @@ TilePyramid.prototype = {
      */
     addTile: function(coord) {
         var tile = this._tiles[coord.id];
-        if (tile)
+        if (tile) {
             return tile;
+        }
 
         var wrapped = coord.wrapped();
-        tile = this._tiles[wrapped.id];
+        for (var haystackID in this._tiles) {
+            // tile.coord is always wrapped
+            var haystackWrappedID = this._tiles[haystackID].coord.id;
+            if (haystackWrappedID === wrapped.id) {
+                tile = this._tiles[haystackID];
+                break;
+            }
+        }
 
         if (!tile) {
             tile = this._cache.get(wrapped.id);
