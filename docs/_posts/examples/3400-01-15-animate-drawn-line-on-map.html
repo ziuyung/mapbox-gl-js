@@ -1,0 +1,78 @@
+---
+layout: example
+category: example
+title: Animate a drawn line on a map
+description: Draw a line as a sine wave and pan the position of the map to center it.
+---
+<div id='map'></div>
+<script>
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v8',
+    center: [0, 0],
+    zoom: 2
+});
+
+function lineSegment(angle) {
+    return [
+        angle,
+        Math.cos(angle) * 20
+    ];
+}
+
+map.on('load', function () {
+
+    // Create a GeoJSON source with an empty lineString.
+    var geojson = {
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": []
+            }
+        }]
+    };
+
+    // Add a source and layer displaying the line which will be
+    // animated in a circle as a sine wave along the map.
+    map.addSource('line-animation', {
+        "type": "geojson",
+        "data": geojson
+    });
+
+    map.addLayer({
+        "type": "line",
+        "source": "line-animation",
+        "layout": {
+            "line-cap": "round",
+            "line-join": "round"
+        },
+        "paint": {
+            "line-color": "#007cbf",
+            "line-width": 5
+        }
+    });
+
+    function animateLine(timestamp) {
+
+        // Append new coordinates to the lineString based on the animation
+        // timestamp. The divisor in the expression `timestamp / 1000` controls
+        // the animation speed.
+        geojson.features[0].geometry.coordinates.push(lineSegment(timestamp / 1000));
+
+        // console.log(timestamp);
+        // Center the coordinates of the map based on the appended segement.
+        // map.flyTo({ center: [timestamp, 0] });
+        // map.panBy([1, 0]);
+
+        map.getSource('line-animation').setData(geojson);
+
+        // Request the next frame of the animation.
+        requestAnimationFrame(animateLine);
+    }
+
+    // Start the animation.
+    animateLine(10);
+});
+</script>
