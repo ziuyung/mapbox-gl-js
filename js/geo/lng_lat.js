@@ -21,6 +21,7 @@ var wrap = require('../util/util').wrap;
  * @param {number} lat latitude
  * @example
  * var ll = new mapboxgl.LngLat(-73.9749, 40.7736);
+ * @see {@link https://www.mapbox.com/mapbox-gl-js/example/timeline-animation/|Create a timeline animation}
  */
 function LngLat(lng, lat) {
     if (isNaN(lng) || isNaN(lat)) {
@@ -41,6 +42,7 @@ function LngLat(lng, lat) {
  * var ll = new mapboxgl.LngLat(286.0251, 40.7736);
  * var wrapped = ll.wrap();
  * wrapped.lng; // = -73.9749
+ * @see {@link https://www.mapbox.com/mapbox-gl-js/example/timeline-animation/|Create a timeline animation}
  */
 LngLat.prototype.wrap = function () {
     return new LngLat(wrap(this.lng, -180, 180), this.lat);

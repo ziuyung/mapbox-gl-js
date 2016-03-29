@@ -107,7 +107,7 @@
   {{/if}}
 
   {{#if examples}}
-    <h3 class='space-bottom1 space-top1'>Examples</h3>
+    <h3 class='space-bottom1 space-top1'>Example code</h3>
 <div class='prose'>
 {{#each examples ~}}
 <pre>
@@ -132,4 +132,15 @@
       </div>
     {{/each}}
   {{/if}}
+
+  {{#if see}}
+    <h3 class='space-bottom1 space-top1'>Full examples</h3>
+    <div class='prose'>
+    <ul>
+    {{#each see}}
+    <li>{{{.}}}</li>
+    {{/each}}
+    </ul>
+    </div>
+    {{/if}}
 </section>

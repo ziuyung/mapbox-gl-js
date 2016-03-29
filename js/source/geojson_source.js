@@ -39,6 +39,9 @@ module.exports = GeoJSONSource;
  * });
  * map.addSource('some id', sourceObj); // add
  * map.removeSource('some id');  // remove
+ * @see
+ * {@link https://www.mapbox.com/mapbox-gl-js/example/live-geojson/|Add live realtime data}
+ * {@link https://www.mapbox.com/mapbox-gl-js/example/rotating-controllable-marker/|Move marker with the keyboard}
  */
 function GeoJSONSource(options) {
     options = options || {};
@@ -90,6 +93,11 @@ GeoJSONSource.prototype = util.inherit(Evented, /** @lends GeoJSONSource.prototy
      *
      * @param {Object|string} data A GeoJSON data object or URL to it. The latter is preferable in case of large GeoJSON files.
      * @returns {GeoJSONSource} this
+     * @see
+     * {@link https://www.mapbox.com/mapbox-gl-js/example/live-geojson/|Add live realtime data}
+     * {@link https://www.mapbox.com/mapbox-gl-js/example/rotating-controllable-marker/|Move marker with the keyboard}
+     * {@link https://www.mapbox.com/mapbox-gl-js/example/animate-point-along-line/|Animate a point}
+     * {@link https://www.mapbox.com/mapbox-gl-js/example/point-from-geocoder-result/|Set a point after Geocoder result}
      */
     setData: function(data) {
         this._data = data;
