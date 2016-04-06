@@ -283,6 +283,11 @@ StyleLayer.prototype = util.inherit(Evented, {
             value: value,
             styleSpec: styleSpec
         }));
+    },
+
+    // overriden by layer subclasses
+    getQueryRadius: function() {
+        return 0;
     }
 });
 

@@ -12,12 +12,6 @@ var Protobuf = require('pbf');
 var GeoJSONFeature = require('../util/vectortile_to_geojson');
 var arraysIntersect = require('../util/util').arraysIntersect;
 
-var intersection = require('../util/intersection_tests');
-var multiPolygonIntersectsBufferedMultiPoint = intersection.multiPolygonIntersectsBufferedMultiPoint;
-var multiPolygonIntersectsMultiPolygon = intersection.multiPolygonIntersectsMultiPolygon;
-var multiPolygonIntersectsBufferedMultiLine = intersection.multiPolygonIntersectsBufferedMultiLine;
-
-
 var FeatureIndexArray = new StructArrayType({
     members: [
         // the index of the feature in the original vectortile
@@ -93,10 +87,6 @@ FeatureIndex.prototype.serialize = function() {
     };
 };
 
-function translateDistance(translate) {
-    return Math.sqrt(translate[0] * translate[0] + translate[1] * translate[1]);
-}
-
 // Finds features in this tile at a particular position.
 FeatureIndex.prototype.query = function(args, styleLayers) {
     if (!this.vtLayers) {
@@ -115,18 +105,7 @@ FeatureIndex.prototype.query = function(args, styleLayers) {
     // expanded by to include these features.
     var additionalRadius = 0;
     for (var id in styleLayers) {
-        var styleLayer = styleLayers[id];
-        var paint = styleLayer.paint;
-
-        var styleLayerDistance = 0;
-        if (styleLayer.type === 'line') {
-            styleLayerDistance = getLineWidth(paint) / 2 + Math.abs(paint['line-offset']) + translateDistance(paint['line-translate']);
-        } else if (styleLayer.type === 'fill') {
-            styleLayerDistance = translateDistance(paint['fill-translate']);
-        } else if (styleLayer.type === 'circle') {
-            styleLayerDistance = paint['circle-radius'] + translateDistance(paint['circle-translate']);
-        }
-        additionalRadius = Math.max(additionalRadius, styleLayerDistance * pixelsToTileUnits);
+        additionalRadius = Math.max(additionalRadius, styleLayers[id].getQueryRadius() * pixelsToTileUnits);
     }
 
     var queryGeometry = args.queryGeometry.map(function(q) {
@@ -165,14 +144,6 @@ function topDownFeatureComparator(a, b) {
     return b - a;
 }
 
-function getLineWidth(paint) {
-    if (paint['line-gap-width'] > 0) {
-        return paint['line-gap-width'] + 2 * paint['line-width'];
-    } else {
-        return paint['line-width'];
-    }
-}
-
 FeatureIndex.prototype.filterMatching = function(result, matching, array, queryGeometry, filter, filterLayerIDs, styleLayers, bearing, pixelsToTileUnits) {
     var previousIndex;
     for (var k = 0; k < matching.length; k++) {
@@ -205,37 +176,12 @@ FeatureIndex.prototype.filterMatching = function(result, matching, array, queryG
             var styleLayer = styleLayers[layerID];
             if (!styleLayer) continue;
 
-            var translatedPolygon;
             if (styleLayer.type !== 'symbol') {
                 // all symbols already match the style
 
                 if (!geometry) geometry = loadGeometry(feature);
 
-                var paint = styleLayer.paint;
-
-                if (styleLayer.type === 'line') {
-                    translatedPolygon = translate(queryGeometry,
-                            paint['line-translate'], paint['line-translate-anchor'],
-                            bearing, pixelsToTileUnits);
-                    var halfWidth = getLineWidth(paint) / 2 * pixelsToTileUnits;
-                    if (paint['line-offset']) {
-                        geometry = offsetLine(geometry, paint['line-offset'] * pixelsToTileUnits);
-                    }
-                    if (!multiPolygonIntersectsBufferedMultiLine(translatedPolygon, geometry, halfWidth)) continue;
-
-                } else if (styleLayer.type === 'fill') {
-                    translatedPolygon = translate(queryGeometry,
-                            paint['fill-translate'], paint['fill-translate-anchor'],
-                            bearing, pixelsToTileUnits);
-                    if (!multiPolygonIntersectsMultiPolygon(translatedPolygon, geometry)) continue;
-
-                } else if (styleLayer.type === 'circle') {
-                    translatedPolygon = translate(queryGeometry,
-                            paint['circle-translate'], paint['circle-translate-anchor'],
-                            bearing, pixelsToTileUnits);
-                    var circleRadius = paint['circle-radius'] * pixelsToTileUnits;
-                    if (!multiPolygonIntersectsBufferedMultiPoint(translatedPolygon, geometry, circleRadius)) continue;
-                }
+                if (!styleLayer.queryIntersectsGeometry(queryGeometry, geometry, bearing, pixelsToTileUnits)) continue;
             }
 
             var geojsonFeature = new GeoJSONFeature(feature, this.z, this.x, this.y);
@@ -251,7 +197,7 @@ FeatureIndex.prototype.filterMatching = function(result, matching, array, queryG
     }
 };
 
-function translate(queryGeometry, translate, translateAnchor, bearing, pixelsToTileUnits) {
+FeatureIndex.translate = function (queryGeometry, translate, translateAnchor, bearing, pixelsToTileUnits) {
     if (!translate[0] && !translate[1]) {
         return queryGeometry;
     }
@@ -272,28 +218,4 @@ function translate(queryGeometry, translate, translateAnchor, bearing, pixelsToT
         translated.push(translatedRing);
     }
     return translated;
-}
-
-function offsetLine(rings, offset) {
-    var newRings = [];
-    var zero = new Point(0, 0);
-    for (var k = 0; k < rings.length; k++) {
-        var ring = rings[k];
-        var newRing = [];
-        for (var i = 0; i < ring.length; i++) {
-            var a = ring[i - 1];
-            var b = ring[i];
-            var c = ring[i + 1];
-            var aToB = i === 0 ? zero : b.sub(a)._unit()._perp();
-            var bToC = i === ring.length - 1 ? zero : c.sub(b)._unit()._perp();
-            var extrude = aToB._add(bToC)._unit();
-
-            var cosHalfAngle = extrude.x * bToC.x + extrude.y * bToC.y;
-            extrude._mult(1 / cosHalfAngle);
-
-            newRing.push(extrude._mult(offset)._add(b));
-        }
-        newRings.push(newRing);
-    }
-    return newRings;
-}
+};
