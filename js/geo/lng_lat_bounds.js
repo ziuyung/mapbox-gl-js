@@ -20,15 +20,51 @@ function LngLatBounds(sw, ne) {
     if (!sw) {
         return;
     } else if (ne) {
-        this.extend(sw).extend(ne);
+        this.setSW(sw).setNE(ne);
     } else if (sw.length === 4) {
-        this.extend([sw[0], sw[1]]).extend([sw[2], sw[3]]);
+        this.setSW([sw[0], sw[1]]).setNE([sw[2], sw[3]]);
     } else {
-        this.extend(sw[0]).extend(sw[1]);
+        this.setSW(sw[0]).setNE(sw[1]);
     }
 }
 
 LngLatBounds.prototype = {
+
+    /**
+     * Extend the bounds to include a given LngLat or LngLatBounds.
+     *
+     * @param {LngLat|LngLatBounds} obj object to extend to
+     * @returns {LngLatBounds} `this`
+     */
+    setNE: function(obj) {
+        var ne = this._ne, ne2;
+
+        if (obj instanceof LngLat) {
+            ne2 = obj;
+        } else {
+            return obj ? this.setNE(LngLat.convert(obj) || LngLatBounds.convert(obj)) : this;
+        }
+        this._ne = new LngLat(ne2.lng, ne2.lat);
+        return this;
+    },
+
+    /**
+     * Extend the bounds to include a given LngLat or LngLatBounds.
+     *
+     * @param {LngLat|LngLatBounds} obj object to extend to
+     * @returns {LngLatBounds} `this`
+     */
+    setSW: function(obj) {
+        var sw = this._sw, sw2;
+
+        if (obj instanceof LngLat) {
+            sw2 = obj;
+        } else {
+            return obj ? this.setSW(LngLat.convert(obj) || LngLatBounds.convert(obj)) : this;
+        }
+        this._sw = new LngLat(sw2.lng, sw2.lat);
+        return this;
+    },
 
     /**
      * Extend the bounds to include a given LngLat or LngLatBounds.
