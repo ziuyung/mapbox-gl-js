@@ -387,10 +387,14 @@ SymbolBucket.prototype.placeFeatures = function(collisionTile, showCollisionBoxe
     // instances to prioritize their placement.
 
     this.byText = this.byText || {};
-    var throttled = false;
+    this.anglePrev = this.anglePrev || false;
+
+    // stabilize shakycam
+    var stable = (this.anglePrev !== false ? Math.abs(collisionTile.angle-this.anglePrev) : Infinity) <= 1e-5;
+    this.anglePrev = collisionTile.angle;
+
     var lineOfSight = false;
-    var bonusThrottle = -8096;
-    var bonusStabilizer = -1024;
+
     if (layout['text-unique'] && center) {
         var byText = this.byText;
         var angle = ((collisionTile.angle - (Math.PI*0.5))*-1) % Math.PI;
@@ -406,42 +410,28 @@ SymbolBucket.prototype.placeFeatures = function(collisionTile, showCollisionBoxe
         var cy = c2.y-c1.y;
         var cm = (c2.x*c1.y)-(c2.y*c1.x);
         var cn = Math.sqrt(Math.pow(c2.y-c1.y,2)+Math.pow(c2.x-c1.x,2));
-        this.symbolInstances.sort(function(a, b) {
-            var distA = Math.abs(cy*a.x - cx*a.y + cm)/cn;
-            var distB = Math.abs(cy*b.x - cx*b.y + cm)/cn;
-            if (byText[a.text] === a) {
-                var angleA = a.placedAngle ? Math.abs(collisionTile.angle-a.placedAngle) : Infinity;
-                // throttle turns
-                if (angleA > Math.PI*0.10) {
-                    distA += bonusThrottle;
-                    throttled = true;
-                // stabilize shakycam
-                } else if (angleA <= Math.PI*0.02) {
-                    distA += bonusStabilizer;
+        for (var i = 0; i < this.symbolInstances.length; i++) {
+            var instance = this.symbolInstances[i];
+            instance.dist =
+            instance.sort = Math.abs(cy*instance.x - cx*instance.y + cm)/cn;
+            if (stable) {
+                if (byText[instance.text] === instance) {
+                    instance.sort -= 512;
+                    instance.placement = 0;
                 } else {
-                    delete a.placedAngle;
+                    instance.placement = 0;
+                }
+            } else {
+                if (byText[instance.text] === instance) {
+                    instance.sort = -Infinity;
+                    instance.placement = 1;
+                } else {
+                    instance.placement = -1;
                 }
             }
-            a.dist = distA;
-            if (byText[b.text] === b) {
-                var angleB = b.placedAngle ? Math.abs(collisionTile.angle-b.placedAngle) : Infinity;
-                // throttle turns
-                if (angleB > Math.PI*0.10) {
-                    distB += bonusThrottle;
-                    throttled = true;
-                // stabilize shakycam
-                } else if (angleB <= Math.PI*0.02) {
-                    distB += bonusStabilizer;
-                } else {
-                    delete b.placedAngle;
-                }
-            }
-            b.dist = distB;
-            return distA - distB;
-        });
+        }
+        this.symbolInstances.sort(function(a, b) { return a.sort - b.sort; });
     }
-
-    if (throttled) console.log('Throttled');
 
     this.byText = {};
     for (var p = 0; p < this.symbolInstances.length; p++) {
@@ -457,29 +447,10 @@ SymbolBucket.prototype.placeFeatures = function(collisionTile, showCollisionBoxe
             continue;
         }
 
-        // Calculate angle of line to camera and skip if it exceeds 45 degree range
-        // @TODO determine layout property for specifying this
-        var angleRange = 45;
-        var cameraToLineAngle = (collisionTile.angle + symbolInstance.angle + (Math.PI*0.5)) % (Math.PI*2);
-        while (cameraToLineAngle < 0) cameraToLineAngle += Math.PI*2;
-        if (layout['text-unique'] && (
-            cameraToLineAngle < (angleRange/180*Math.PI) ||
-            cameraToLineAngle > ((360-angleRange)/180*Math.PI) ||
-            (cameraToLineAngle > ((180-angleRange)/180*Math.PI) && cameraToLineAngle < ((180+angleRange)/180*Math.PI))
-        )) {
+        // Filter placement when in guidance mode.
+        // @TODO determine layout property for specifying this.
+        if (layout['text-unique'] && !allowGuidancePlacement(lineOfSight, collisionTile, symbolInstance)) {
             continue;
-        }
-
-        // When in guidance mode, disallow labels
-        // - that are further from the line of sight than 1024 units
-        // - whose line segment geometry does not intersect with the line of sight (buffered)
-        if (layout['text-unique'] && lineOfSight) {
-            if (symbolInstance.dist > 1024) continue;
-            if (symbolInstance.line[0].dist(symbolInstance) < 1024 || symbolInstance.line[symbolInstance.line.length-1].dist(symbolInstance) < 1024) {
-                if (!lineIntersectsBufferedLine(symbolInstance.line, lineOfSight, 0)) continue;
-            } else {
-                if (!lineIntersectsBufferedLine(symbolInstance.line, lineOfSight, 256)) continue;
-            }
         }
 
         // Calculate the scales at which the text and icon can be placed without collision.
@@ -514,7 +485,7 @@ SymbolBucket.prototype.placeFeatures = function(collisionTile, showCollisionBoxe
                 this.addSymbols('glyph', symbolInstance.glyphQuads, glyphScale, layout['text-keep-upright'], textAlongLine, collisionTile.angle);
                 if (layout['text-unique']) {
                     this.byText[symbolInstance.text] = symbolInstance;
-                    symbolInstance.placedAngle = symbolInstance.placedAngle || collisionTile.angle;
+                    symbolInstance.placedAngle = collisionTile.angle;
                 }
             }
         }
@@ -531,6 +502,58 @@ SymbolBucket.prototype.placeFeatures = function(collisionTile, showCollisionBoxe
 
     if (showCollisionBoxes) this.addToDebugBuffers(collisionTile);
 };
+
+function allowGuidancePlacement(lineOfSight, collisionTile, symbolInstance) {
+    // Force placement
+    if (symbolInstance.placement === 1) return true;
+
+    // Force hide
+    if (symbolInstance.placement === -1) return false;
+
+    // Calculate angle of line to camera and skip if it exceeds 45 degree range
+    var angleRange = 30;
+    var cameraToLineAngle = (collisionTile.angle + symbolInstance.angle + (Math.PI*0.5)) % (Math.PI*2);
+    while (cameraToLineAngle < 0) cameraToLineAngle += Math.PI*2;
+    if (
+        cameraToLineAngle < (angleRange/180*Math.PI) ||
+        cameraToLineAngle > ((360-angleRange)/180*Math.PI) ||
+        (cameraToLineAngle > ((180-angleRange)/180*Math.PI) && cameraToLineAngle < ((180+angleRange)/180*Math.PI))
+    ) return false;
+
+    // Hard stop from centerline
+    if (symbolInstance.dist > 2048) return false;
+
+    // When in guidance mode, disallow labels
+    // - that are further from the line of sight than 1024 units
+    // - whose line segment geometry does not intersect with the line of sight (buffered)
+    if (lineOfSight) {
+        // Line crosses LOS in the interior of the tile.
+        if (lineIntersectsBufferedLine(symbolInstance.line, lineOfSight, 0)) return true;
+
+        // The line start meets/crosses the tile extent toward LOS.
+        // Only label the line if the anchor is far enough from the tile edge.
+        var start = symbolInstance.line[0];
+        var end = symbolInstance.line[symbolInstance.line.length-1];
+        var lineAtExtent = (
+            (start.x <= 0 || start.x >= EXTENT || start.y <= 0 || start.y >= EXTENT) &&
+            lineIntersectsBufferedLine([start], lineOfSight, 1024) &&
+            start
+        ) || (
+            (end.x <= 0 || end.x >= EXTENT || end.y <= 0 || end.y >= EXTENT) &&
+            lineIntersectsBufferedLine([end], lineOfSight, 1024) &&
+            end
+        );
+        if (lineAtExtent && lineAtExtent.dist(symbolInstance) < 2048) return false;
+
+        // Line crosses LOS in the interior of the tile.
+        if (lineIntersectsBufferedLine(symbolInstance.line, lineOfSight, 1024)) return true;
+
+        // Don't label in all other cases.
+        return false;
+    } else {
+        return true;
+    }
+}
 
 SymbolBucket.prototype.addSymbols = function(programName, quads, scale, keepUpright, alongLine, placementAngle) {
 
