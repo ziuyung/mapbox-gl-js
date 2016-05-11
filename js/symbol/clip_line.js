@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var Point = require('point-geometry');
@@ -15,8 +16,9 @@ module.exports = clipLine;
  * @returns {Array<Array<Point>>} lines
  * @private
  */
-function clipLine(lines, x1, y1, x2, y2) {
-    var clippedLines = [];
+function clipLine(lines/*: Array<Array<Point>> */,
+        x1/*: number */, y1/*: number */, x2/*: number */, y2/*: number */) {
+    var clippedLines/*: Array<Array<Point>> */ = [];
 
     for (var l = 0; l < lines.length; l++) {
         var line = lines[l];

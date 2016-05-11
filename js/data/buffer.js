@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var assert = require('assert');
@@ -14,7 +15,7 @@ module.exports = Buffer;
  * @param {object} arrayType A serialized StructArrayType.
  * @param {BufferType} type
  */
-function Buffer(array, arrayType, type) {
+function Buffer(array/*: Object */, arrayType/*: Object */, type/*: string */) {
     this.arrayBuffer = array.arrayBuffer;
     this.length = array.length;
     this.attributes = arrayType.members;

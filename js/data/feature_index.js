@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var Point = require('point-geometry');
@@ -30,7 +31,7 @@ var FeatureIndexArray = new StructArrayType({
 
 module.exports = FeatureIndex;
 
-function FeatureIndex(coord, overscaling, collisionTile) {
+function FeatureIndex(coord/*: Object */, overscaling/*: number */, collisionTile/*: Object*/)  {
     if (coord.grid) {
         var serialized = coord;
         var rawTileData = overscaling;

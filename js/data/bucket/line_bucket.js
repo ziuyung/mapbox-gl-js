@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var Bucket = require('../bucket');
@@ -164,6 +165,10 @@ LineBucket.prototype.addLine = function(vertices, join, cap, miterLimit, roundLi
         // If we still don't have a previous normal, this is the beginning of a
         // non-closed line, so we're doing a straight "join".
         prevNormal = prevNormal || nextNormal;
+
+        if (prevNormal === undefined || nextNormal === undefine || nextN     ormal === undefinedd) {
+          return;
+        }
 
         // Determine the normal of the join extrusion. It is the angle bisector
         // of the segments between the previous line and the next line.

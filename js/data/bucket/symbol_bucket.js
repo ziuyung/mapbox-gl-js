@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var Point = require('point-geometry');
@@ -24,7 +25,7 @@ var EXTENT = Bucket.EXTENT;
 
 module.exports = SymbolBucket;
 
-function SymbolBucket(options) {
+function SymbolBucket(options/*: Object */) {
     Bucket.apply(this, arguments);
     this.showCollisionBoxes = options.showCollisionBoxes;
     this.overscaling = options.overscaling;

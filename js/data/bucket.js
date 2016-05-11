@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var featureFilter = require('feature-filter');
@@ -14,7 +15,7 @@ module.exports = Bucket;
  * @param options See `Bucket` constructor options
  * @returns {Bucket}
  */
-Bucket.create = function(options) {
+Bucket.create = function(options/*: Object */) {
     var Classes = {
         fill: require('./bucket/fill_bucket'),
         line: require('./bucket/line_bucket'),
@@ -58,7 +59,7 @@ Bucket.EXTENT = 8192;
  *     built for this tile. This object facilitates sharing of `Buffer`s be
        between `Bucket`s.
  */
-function Bucket(options) {
+function Bucket(options/*: Object */) {
     this.zoom = options.zoom;
     this.overscaling = options.overscaling;
     this.layer = options.layer;

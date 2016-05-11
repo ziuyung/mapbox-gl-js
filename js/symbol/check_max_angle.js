@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 module.exports = checkMaxAngle;
@@ -15,7 +16,7 @@ module.exports = checkMaxAngle;
  * @returns {boolean} whether the label should be placed
  * @private
  */
-function checkMaxAngle(line, anchor, labelLength, windowSize, maxAngle) {
+function checkMaxAngle(line/*: Array<Object> */, anchor/*: Object */, labelLength/*: number */, windowSize/*: number */, maxAngle/*: number */) {
 
     // horizontal labels always pass
     if (anchor.segment === undefined) return true;

@@ -1,10 +1,11 @@
+/* @flow */
 'use strict';
 
 var Point = require('point-geometry');
 
 module.exports = Anchor;
 
-function Anchor(x, y, angle, segment) {
+function Anchor(x/*: number */, y/*: number */, angle/*: number */, segment/*: ?number */) {
     this.x = x;
     this.y = y;
     this.angle = angle;

@@ -1,3 +1,4 @@
+/* @flow */
 'use strict';
 
 var EXTENT = require('./bucket').EXTENT;
@@ -12,7 +13,7 @@ var warned = false;
  * used internally.
  * @private
  */
-module.exports = function loadGeometry(feature) {
+module.exports = function loadGeometry(feature/*: Object */) {
     var scale = EXTENT / feature.extent;
     var geometry = feature.loadGeometry();
     for (var r = 0; r < geometry.length; r++) {
