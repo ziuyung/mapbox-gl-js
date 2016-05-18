@@ -47,9 +47,9 @@ void main() {
 
     if (u_alphamask) {
         if (anchor[0] >= 0.0) {
-            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0-anchor[0]) - -0.50) * 10.0, 0.0, 1.0));
+            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0-anchor[0]) - -0.50) * 5.0, 0.0, 1.0));
         } else {
-            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0+anchor[0]) - -0.50) * 10.0, 0.0, 1.0));
+            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0+anchor[0]) - -0.50) * 5.0, 0.0, 1.0));
         }
     }
 
