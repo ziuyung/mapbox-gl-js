@@ -16,7 +16,6 @@ uniform bool u_skewed;
 uniform float u_extra;
 uniform vec2 u_extrude_scale;
 uniform vec2 u_skewed_extrude_scale;
-
 uniform vec2 u_texsize;
 
 varying vec2 v_tex;
@@ -62,6 +61,16 @@ void main() {
     // how much features are squished in all directions by the perspectiveness
     float perspective_scale = 1.0 / (1.0 - y * u_extra);
     v_gamma_scale = perspective_scale;
+
+    // position of x on the screen
+    float x = gl_Position.x / gl_Position.w;
+    if (x >= 0.0 && y-x > 0.0) {
+        v_angle_alpha = 1.0;
+    } else if (x < 0.0 && y+x > 0.0) {
+        v_angle_alpha = 1.0;
+    } else {
+        v_angle_alpha = 0.0;
+    }
 
     v_tex = a_tex / u_texsize;
     v_fade_tex = vec2(a_labelminzoom / 255.0, 0.0);
