@@ -31,7 +31,6 @@ function drawSymbols(painter, source, layer, coords) {
     painter.depthMask(false);
     gl.disable(gl.DEPTH_TEST);
 
-
     drawLayerSymbols(painter, source, layer, coords, 'icon',
             layer.paint['icon-translate'],
             layer.paint['icon-translate-anchor'],
@@ -41,7 +40,8 @@ function drawSymbols(painter, source, layer, coords) {
             layer.paint['icon-halo-color'],
             layer.paint['icon-halo-blur'],
             layer.paint['icon-opacity'],
-            layer.paint['icon-color']);
+            layer.paint['icon-color'],
+            layer.layout['alpha-mask']);
 
     drawLayerSymbols(painter, source, layer, coords, 'box',
             layer.paint['text-translate'],
@@ -53,6 +53,7 @@ function drawSymbols(painter, source, layer, coords) {
             layer.paint['text-halo-blur'],
             layer.paint['text-opacity'],
             layer.paint['text-color'],
+            layer.layout['alpha-mask'],
             layer.paint['text-box-color']);
 
     drawLayerSymbols(painter, source, layer, coords, 'glyph',
@@ -64,7 +65,8 @@ function drawSymbols(painter, source, layer, coords) {
             layer.paint['text-halo-color'],
             layer.paint['text-halo-blur'],
             layer.paint['text-opacity'],
-            layer.paint['text-color']);
+            layer.paint['text-color'],
+            layer.layout['alpha-mask']);
 
     gl.enable(gl.DEPTH_TEST);
 
@@ -81,6 +83,7 @@ function drawLayerSymbols(painter, source, layer, coords, group,
         haloBlur,
         opacity,
         color,
+        alphaMask,
         boxColor) {
 
     haloColor = util.premultiply(haloColor);
@@ -114,6 +117,7 @@ function drawLayerSymbols(painter, source, layer, coords, group,
                 haloBlur,
                 opacity,
                 color,
+                alphaMask,
                 boxColor);
     }
 }
@@ -128,6 +132,7 @@ function drawSymbol(painter, layer, posMatrix, tile, bucket, bufferGroups, isTex
         haloBlur,
         opacity,
         color,
+        alphaMask,
         boxColor) {
     var gl = painter.gl;
     var tr = painter.transform;
@@ -190,6 +195,7 @@ function drawSymbol(painter, layer, posMatrix, tile, bucket, bufferGroups, isTex
     gl.activeTexture(gl.TEXTURE1);
     painter.frameHistory.bind(gl);
     gl.uniform1i(program.u_fadetexture, 1);
+    gl.uniform1i(program.u_alphamask, alphaMask);
 
     var group;
 

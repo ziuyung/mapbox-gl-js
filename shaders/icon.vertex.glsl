@@ -12,6 +12,7 @@ uniform mat4 u_matrix;
 
 uniform mediump float u_zoom;
 uniform bool u_skewed;
+uniform bool u_alphamask;
 uniform float u_extra;
 uniform vec2 u_extrude_scale;
 
@@ -19,8 +20,10 @@ uniform vec2 u_texsize;
 
 varying vec2 v_tex;
 varying vec2 v_fade_tex;
+varying float v_mask_alpha;
 
 void main() {
+    vec4 anchor;
     vec2 a_tex = a_data1.xy;
     mediump float a_labelminzoom = a_data1[2];
     mediump vec2 a_zoom = a_data2.st;
@@ -32,10 +35,22 @@ void main() {
 
     vec2 extrude = u_extrude_scale * (a_offset / 64.0);
     if (u_skewed) {
+        anchor = u_matrix * vec4(a_pos, 0, 1);
         gl_Position = u_matrix * vec4(a_pos + extrude, 0, 1);
         gl_Position.z += z * gl_Position.w;
     } else {
+        anchor = u_matrix * vec4(a_pos, 0, 1);
         gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
+    }
+
+    v_mask_alpha = 1.0;
+
+    if (u_alphamask) {
+        if (anchor[0] >= 0.0) {
+            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0-anchor[0]) - -0.50) * 10.0, 0.0, 1.0));
+        } else {
+            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0+anchor[0]) - -0.50) * 10.0, 0.0, 1.0));
+        }
     }
 
     v_tex = a_tex / u_texsize;
