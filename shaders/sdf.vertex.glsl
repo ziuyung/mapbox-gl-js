@@ -50,7 +50,15 @@ void main() {
             v_mask_alpha = 1.0;
         }
     } else {
-        vec2 extrude = u_extrude_scale * (a_offset / 64.0);
+        highp float Angle = 32.0/255.0*2.0*3.141592653589793;
+        mat4 RotationMatrix = mat4( cos( Angle ), -sin( Angle ), 0.0, 0.0,
+            sin( Angle ),  cos( Angle ), 0.0, 0.0,
+            0.0,           0.0, 1.0, 0.0,
+            0.0,           0.0, 0.0, 1.0 );
+        // mat4 billboard_rotate_matrix = mat4(cos, -1.0 * sin, sin, cos);
+
+        vec4 offset = RotationMatrix * vec4(a_offset, 0, 0);
+        vec2 extrude = u_extrude_scale * (vec2(offset[0], offset[1]) / 64.0);
         anchor = u_matrix * vec4(a_pos, 0, 1);
         gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
         if (u_skewed) {
