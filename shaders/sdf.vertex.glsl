@@ -21,6 +21,7 @@ uniform vec2 u_texsize;
 
 varying vec2 v_tex;
 varying vec2 v_fade_tex;
+varying vec2 v_angle_tex;
 varying float v_gamma_scale;
 varying float v_mask_alpha;
 
@@ -37,7 +38,7 @@ void main() {
 
     mediump float a_labelangle = floor(a_data1[3]/2.0);
     mediump float a_labelline = mod(a_data1[3],2.0);
-    mediump float a_labeldelta = mod(u_angle + a_labelangle + 32.0, 64.0);
+    mediump float a_labeldelta = 32.0 - mod(u_angle + a_labelangle + 32.0, 64.0);
 
     // map-oriented labels
     if (u_skewed) {
@@ -47,16 +48,16 @@ void main() {
             anchor = u_matrix * vec4(a_pos, 0, 1);
             gl_Position = u_matrix * vec4(a_pos + extrude, 0, 1);
             gl_Position.z += z * gl_Position.w;
-            v_mask_alpha = clamp(abs(32.0-a_labeldelta)*0.5 - 3.0, 0.0, 1.0);
+            v_angle_tex = vec2((a_labelangle + 128.0) / 255.0, 0.0);
         // billboard labels
         } else {
-            mediump float angle = mod((32.0-a_labeldelta), 256.0)/256.0*2.0*3.141592653589793;
+            mediump float angle = mod(a_labeldelta, 256.0)/256.0*2.0*3.141592653589793;
             mat2 RotationMatrix = mat2(cos(angle),-sin(angle),sin(angle),cos(angle));
             vec2 offset = RotationMatrix * a_offset;
             vec2 extrude = u_extrude_scale * (offset / 64.0);
             anchor = u_matrix * vec4(a_pos, 0, 1);
             gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
-            v_mask_alpha = clamp(4.0 - abs(32.0-a_labeldelta)*0.5, 0.0, 1.0);
+            v_angle_tex = vec2(a_labelangle / 255.0, 0.0);
         }
     // strictly viewport-oriented labels
     } else {
@@ -64,6 +65,7 @@ void main() {
         anchor = u_matrix * vec4(a_pos, 0, 1);
         gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
         v_mask_alpha = 1.0;
+        v_angle_tex = vec2((128.0 + mod(32.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
     }
 
     // position of x, y on the screen
@@ -72,12 +74,15 @@ void main() {
     float perspective_scale = 1.0 / (1.0 - y * u_extra);
     v_gamma_scale = perspective_scale;
 
+    // @TODO move this to loading alphamask value from an icon texture
     if (u_alphamask) {
         if (anchor[0] >= 0.0) {
-            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0-anchor[0]) - -0.50) * 5.0, 0.0, 1.0));
+            v_mask_alpha = clamp(((anchor[1]*4.0-anchor[0]) - -0.50) * 5.0, 0.0, 1.0);
         } else {
-            v_mask_alpha = min(v_mask_alpha, clamp(((anchor[1]*4.0+anchor[0]) - -0.50) * 5.0, 0.0, 1.0));
+            v_mask_alpha = clamp(((anchor[1]*4.0+anchor[0]) - -0.50) * 5.0, 0.0, 1.0);
         }
+    } else {
+        v_mask_alpha = 1.0;
     }
 
     v_tex = a_tex / u_texsize;

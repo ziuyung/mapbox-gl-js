@@ -190,11 +190,15 @@ function drawSymbol(painter, layer, posMatrix, tile, bucket, bufferGroups, isTex
     gl.uniform1f(program.u_zoom, (painter.transform.zoom - zoomAdjust) * 10); // current zoom level
 
     // current tile angle
-    gl.uniform1f(program.u_angle, (tile.collisionTile.angle/(Math.PI*2)) * 128);
+    var angle = (tile.collisionTile.angle + (Math.PI*2)) % (Math.PI*2);
+    gl.uniform1f(program.u_angle, (angle/(Math.PI*2)) * 128);
 
     gl.activeTexture(gl.TEXTURE1);
     painter.frameHistory.bind(gl);
+    gl.activeTexture(gl.TEXTURE2);
+    painter.frameHistory.bindAngle(gl);
     gl.uniform1i(program.u_fadetexture, 1);
+    gl.uniform1i(program.u_angletexture, 2);
     gl.uniform1i(program.u_alphamask, alphaMask);
 
     var group;

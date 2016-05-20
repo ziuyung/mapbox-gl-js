@@ -197,7 +197,7 @@ Painter.prototype.render = function(style, options) {
 
     this.glyphSource = style.glyphSource;
 
-    this.frameHistory.record(this.transform.zoom);
+    this.frameHistory.record(this.transform.zoom, this.transform.angle);
 
     this.prepareBuffers();
     this.clearColor();
