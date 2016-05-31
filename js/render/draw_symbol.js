@@ -4,7 +4,7 @@ var browser = require('../util/browser');
 var drawCollisionDebug = require('./draw_collision_debug');
 var util = require('../util/util');
 var pixelsToTileUnits = require('../source/pixels_to_tile_units');
-
+var mat4 = require('gl-matrix').mat4;
 
 module.exports = drawSymbols;
 
@@ -158,6 +158,20 @@ function drawSymbol(painter, layer, posMatrix, tile, bucket, bufferGroups, isTex
 
     if (programName === 'icon' && !painter.style.sprite.loaded())
         return;
+
+//    try {
+//        var multiplied = new Float32Array(4);
+//        var matrix = painter.translatePosMatrix(posMatrix, tile, translate, translateAnchor);
+//        mat4.multiply(multiplied, matrix, [2, 2, 0, 0]);
+//        var x1 = multiplied[0];
+//        var y1 = multiplied[1];
+//        mat4.multiply(multiplied, matrix, [3, 3, 0, 0]);
+//        var x2 = multiplied[0];
+//        var y2 = multiplied[1];
+//        console.log(Math.atan2(x1-x2, y1-y2));
+//    } catch(err) {
+//        console.warn(err);
+//    }
 
     var program = painter.useProgram(programName);
     gl.uniformMatrix4fv(program.u_matrix, false, painter.translatePosMatrix(posMatrix, tile, translate, translateAnchor));
