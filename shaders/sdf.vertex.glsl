@@ -15,6 +15,7 @@ uniform mediump float u_zoom;
 uniform bool u_skewed;
 uniform bool u_alphamask;
 uniform float u_extra;
+uniform float u_pitch;
 uniform vec2 u_extrude_scale;
 uniform vec2 u_skewed_extrude_scale;
 uniform vec2 u_texsize;
@@ -33,6 +34,7 @@ void main() {
     mediump vec2 a_zoom = a_data2.st;
     mediump float a_minzoom = a_zoom[0];
     mediump float a_maxzoom = a_zoom[1];
+    mediump float pitchfactor = sin(u_pitch) * 0.25;
 
     // u_zoom is the current zoom level adjusted for the change in font size
     mediump float z = 2.0 - step(a_minzoom, u_zoom) - (1.0 - step(a_maxzoom, u_zoom));
@@ -52,7 +54,7 @@ void main() {
             v_angle_tex = vec2((128.0 + mod(64.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
         // billboard labels
         } else {
-            highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*2.0*PI;
+            highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*PI;
             vec4 anchorA = u_matrix * vec4(a_pos - vec2(cos(lineangle),sin(lineangle)), 0, 1);
             vec4 anchorB = u_matrix * vec4(a_pos + vec2(cos(lineangle),sin(lineangle)), 0, 1);
             highp float angle = mod(atan(anchorB[1]/anchorB[3] - anchorA[1]/anchorA[3], anchorB[0]/anchorB[3] - anchorA[0]/anchorA[3]) + PI, 2.0 * PI);
@@ -63,7 +65,7 @@ void main() {
 
             mat2 RotationMatrix = mat2(cos(angle),-sin(angle),sin(angle),cos(angle));
 
-            vec2 offset = RotationMatrix * a_offset;
+            vec2 offset = RotationMatrix * (vec2((1.0-pitchfactor)+(pitchfactor*cos(angle)), 1.0) * a_offset);
             vec2 extrude = u_extrude_scale * (offset / 64.0);
             gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
             v_angle_tex = vec2((128.0 + mod(32.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
