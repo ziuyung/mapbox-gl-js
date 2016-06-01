@@ -26,6 +26,7 @@ varying float v_gamma_scale;
 varying float v_mask_alpha;
 
 void main() {
+    highp float PI = 3.141592653589793;
     vec4 anchor;
     vec2 a_tex = a_data1.xy;
     mediump float a_labelminzoom = a_data1[2];
@@ -51,21 +52,20 @@ void main() {
             v_angle_tex = vec2((128.0 + mod(64.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
         // billboard labels
         } else {
-            highp float a_labeldelta = 32.0 - mod(u_angle + a_labelangle + 32.0, 64.0);
-            highp float angle = mod(a_labeldelta*2.0,256.0)/256.0*2.0*3.141592653589793;
-            // mat2 RotationMatrix = mat2(cos(angle),-sin(angle),sin(angle),cos(angle));
+            highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*2.0*PI;
+            vec4 anchorA = u_matrix * vec4(a_pos - vec2(cos(lineangle),sin(lineangle)), 0, 1);
+            vec4 anchorB = u_matrix * vec4(a_pos + vec2(cos(lineangle),sin(lineangle)), 0, 1);
+            highp float angle = mod(atan(anchorB[1]/anchorB[3] - anchorA[1]/anchorA[3], anchorB[0]/anchorB[3] - anchorA[0]/anchorA[3]) + PI, 2.0 * PI);
 
-            highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*2.0*3.141592653589793;
-            anchor = u_matrix * vec4(a_pos, 0, 1);
-            vec4 anchor2 = u_matrix * vec4(a_pos + vec2(cos(lineangle), sin(lineangle)), 0, 1);
-            highp float angle2 = atan(anchor2[1] - anchor[1], anchor2[0] - anchor[0]);
-            // mediump float angle2 = atan(anchor2[0] - anchor[0], anchor2[1] - anchor[1]);
-            mat2 RotationMatrix = mat2(cos(angle2),-sin(angle2),sin(angle2),cos(angle2));
+            if (mod(angle + 0.5 * PI, 2.0 * PI) > PI) {
+                angle = mod(angle + PI, 2.0 * PI);
+            }
+
+            mat2 RotationMatrix = mat2(cos(angle),-sin(angle),sin(angle),cos(angle));
 
             vec2 offset = RotationMatrix * a_offset;
             vec2 extrude = u_extrude_scale * (offset / 64.0);
             gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
-            // v_angle_tex = vec2(a_labelangle / 255.0, 0.0);
             v_angle_tex = vec2((128.0 + mod(32.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
         }
     // strictly viewport-oriented labels
