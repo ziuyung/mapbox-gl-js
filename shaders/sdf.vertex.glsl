@@ -50,8 +50,6 @@ void main() {
             anchor = u_matrix * vec4(a_pos, 0, 1);
             gl_Position = u_matrix * vec4(a_pos + extrude, 0, 1);
             gl_Position.z += z * gl_Position.w;
-            // v_angle_tex = vec2((a_labelangle + 128.0) / 255.0, 0.0);
-            v_angle_tex = vec2((128.0 + mod(64.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
         // billboard labels
         } else {
             highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*PI;
@@ -68,7 +66,6 @@ void main() {
             vec2 offset = RotationMatrix * (vec2((1.0-pitchfactor)+(pitchfactor*cos(angle)), 1.0) * a_offset);
             vec2 extrude = u_extrude_scale * (offset / 64.0);
             gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
-            v_angle_tex = vec2((128.0 + mod(32.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
         }
     // strictly viewport-oriented labels
     } else {
@@ -76,7 +73,6 @@ void main() {
         anchor = u_matrix * vec4(a_pos, 0, 1);
         gl_Position = u_matrix * vec4(a_pos, 0, 1) + vec4(extrude, 0, 0);
         v_mask_alpha = 1.0;
-        v_angle_tex = vec2((128.0 + mod(32.0 + 255.0 - u_angle,128.0)) / 255.0, 0.0);
     }
 
     // position of x, y on the screen
