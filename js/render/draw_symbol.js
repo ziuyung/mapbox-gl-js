@@ -166,6 +166,7 @@ function drawSymbol(painter, layer, posMatrix, tile, bucket, bufferGroups, isTex
     gl.uniform1f(program.u_pitch, painter.transform.pitch / 360 * 2 * Math.PI);
     gl.uniform2fv(program.u_extrude_scale, viewExtrudeScale);
     gl.uniform2fv(program.u_skewed_extrude_scale, skewedExtrudeScale);
+    gl.uniform1f(program.u_aspect_ratio, tr.width/tr.height);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.uniform1i(program.u_texture, 0);

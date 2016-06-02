@@ -16,6 +16,7 @@ uniform bool u_skewed;
 uniform bool u_alphamask;
 uniform float u_extra;
 uniform float u_pitch;
+uniform float u_aspect_ratio;
 uniform vec2 u_extrude_scale;
 uniform vec2 u_skewed_extrude_scale;
 uniform vec2 u_texsize;
@@ -55,7 +56,7 @@ void main() {
             highp float lineangle = mod(a_labelangle*2.0,256.0)/256.0*PI;
             vec4 anchorA = u_matrix * vec4(a_pos - vec2(cos(lineangle),sin(lineangle)), 0, 1);
             vec4 anchorB = u_matrix * vec4(a_pos + vec2(cos(lineangle),sin(lineangle)), 0, 1);
-            highp float angle = mod(atan(anchorB[1]/anchorB[3] - anchorA[1]/anchorA[3], anchorB[0]/anchorB[3] - anchorA[0]/anchorA[3]) + PI, 2.0 * PI);
+            highp float angle = mod(atan((anchorB[1]/anchorB[3] - anchorA[1]/anchorA[3])/u_aspect_ratio, anchorB[0]/anchorB[3] - anchorA[0]/anchorA[3]) + PI, 2.0 * PI);
 
             if (mod(angle + 0.5 * PI, 2.0 * PI) > PI) {
                 angle = mod(angle + PI, 2.0 * PI);
