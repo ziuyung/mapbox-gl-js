@@ -61,7 +61,7 @@ ExtrusionBucket.prototype.programInterfaces = {
 };
 
 ExtrusionBucket.prototype.addFeature = function(feature) {
-    var levels = feature.properties && feature.properties.levels || 3;
+    var levels = feature.properties && feature.properties.height || 3;
 
     var lines = loadGeometry(feature);
     var polygons = convertCoords(classifyRings(lines, EARCUT_MAX_RINGS));
@@ -81,7 +81,7 @@ ExtrusionBucket.prototype.addPolygon = function(polygon, levels) {
     var holeIndices = [];
     var startIndex = group.layout.vertex.length;
 
-    var h = levels * 3;
+    var h = levels;
 
     var indices = [];
 
