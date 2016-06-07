@@ -12,6 +12,7 @@ module.exports = draw;
 function draw(painter, source, layer, coords) {
     var gl = painter.gl;
     gl.disable(gl.STENCIL_TEST);
+    painter.depthMask(true);
 
     for (var i = 0; i < coords.length; i++) {
         var coord = coords[i];
