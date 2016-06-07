@@ -20,13 +20,17 @@ function draw(painter, source, layer, coords) {
         painter.depthMask(true);
         // gl.enable(gl.DEPTH_TEST);
 
-        var texture = new PrerenderedExtrusionLayer(gl, painter);
+        var multiplier = layer.paint['extrusion-antialias'] ? 2 : 1;
+
+        var texture = new PrerenderedExtrusionLayer(gl, painter, multiplier);
         texture.bindFramebuffer();
 
         gl.clearStencil(0x80);
         gl.stencilMask(0xFF);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.stencilMask(0x00);
+
+        painter.resize(painter.width * multiplier, painter.height * multiplier);
 
         // DRAW
         for (var i = 0; i < coords.length; i++) {
@@ -37,11 +41,11 @@ function draw(painter, source, layer, coords) {
         if (!painter.isOpaquePass && layer.paint['extrusion-antialias']) {
             for (var i = 0; i < coords.length; i++) {
                 var coord = coords[i];
-                // TODO this is majorly broken -- causes only 1 rendered tile at a time
-                // drawExtrusionStroke(painter, source, layer, coord);
+                drawExtrusionStroke(painter, source, layer, coord);
             }
         }
 
+        painter.resize(painter.width / multiplier, painter.height / multiplier);
 
         texture.unbindFramebuffer();
 
@@ -50,7 +54,7 @@ function draw(painter, source, layer, coords) {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture.texture);
 
-        gl.uniform1f(program.u_opacity, 0.85);
+        gl.uniform1f(program.u_opacity, layer.paint['extrusion-opacity'] || 1);
         gl.uniform1i(program.u_texture, 1);
         var zScale = Math.pow(2, painter.transform.zoom) / 50000;
 
@@ -105,11 +109,11 @@ function draw(painter, source, layer, coords) {
     // gl.enable(gl.STENCIL_TEST);
 }
 
-function PrerenderedExtrusionLayer(gl, painter) {
+function PrerenderedExtrusionLayer(gl, painter, scale) {
     this.gl = gl;
     // this.buffer = 1/32;
-    this.width = painter.width;
-    this.height = painter.height;
+    this.width = painter.width * scale;
+    this.height = painter.height * scale;
     this.painter = painter;
 
     this.texture = null;
@@ -208,6 +212,7 @@ function drawExtrusion(painter, source, layer, coord) {
     } else {
         // TODO I'm essentially copying all of this piecemeal for pattern; refactor later
 
+        // TODO i assume this does nothing because of :point_down:
         gl.uniformMatrix4fv(program.u_matrix, false, painter.translatePosMatrix(
             coord.posMatrix,
             tile,
@@ -222,6 +227,8 @@ function drawExtrusion(painter, source, layer, coord) {
             coord.posMatrix,
             [1, 1, zScale, 1])
         );
+
+        // TODO why isn't this above??
 
         gl.uniform4fv(program.u_color, color);
         gl.uniform1f(program.u_opacity, opacity);
