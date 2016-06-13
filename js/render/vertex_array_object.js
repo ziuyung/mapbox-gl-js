@@ -76,9 +76,7 @@ VertexArrayObject.prototype.freshBind = function(gl, program, vertexBuffer, elem
 
     // Enable all attributes for the new program.
     for (var j = numPrevAttributes; j < numNextAttributes; j++) {
-        if (program[vertexBuffer.attributes[j].name] !== undefined) {
-            gl.enableVertexAttribArray(j);
-        }
+        gl.enableVertexAttribArray(j);
     }
 
     /**
@@ -110,7 +108,6 @@ VertexArrayObject.prototype.freshBind = function(gl, program, vertexBuffer, elem
 
     vertexBuffer.bind(gl);
     setVertexAttribPointers(vertexBuffer);
-
     if (vertexBuffer2) {
         vertexBuffer2.bind(gl);
         setVertexAttribPointers(vertexBuffer2);
