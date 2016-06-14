@@ -30,6 +30,8 @@ var defaultOptions = {
     bearing: 0,
     pitch: 0,
 
+    'lighting-anchor': 'viewport',
+
     minZoom: defaultMinZoom,
     maxZoom: defaultMaxZoom,
 
@@ -121,6 +123,7 @@ var Map = module.exports = function(options) {
     this._preserveDrawingBuffer = options.preserveDrawingBuffer;
     this._trackResize = options.trackResize;
     this._workerCount = options.workerCount;
+    this._lightingAnchor = options['lighting-anchor'];
 
     if (typeof options.container === 'string') {
         this._container = document.getElementById(options.container);
