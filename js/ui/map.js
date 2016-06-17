@@ -1353,3 +1353,4 @@ function removeNode(node) {
    * @instance
    * @property {EventData} data Original event data, if fired interactively
    */
+
