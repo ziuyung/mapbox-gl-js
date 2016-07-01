@@ -59,7 +59,6 @@ toc:
       sources.  See also [Map#addSourceType](#Map#addSourceType)
   - Source
   - WorkerSource
-  - CreateSourceFunction
   - Dispatcher
   - GeoJSONWorkerSource
 
