@@ -227,7 +227,18 @@ function drawExtrusion(painter, source, layer, coord) {
 
     gl.uniform4fv(program.u_shadow, shadowColor);
 
-    var lightdir = [-0.5, -0.6, 0.9];
+    var lightdir = [0.5, -1, 1];
+    // NZD's notes:
+    // each object has its own light source
+    // coordinates are relative to each object, not a global scene
+    // [0,0,0] is the center of the object
+    // when anchor is viewport:
+    // x: +: left, -: right
+    // y: +: back (away from viewer), -: front(towards viewer)
+    // z: +: up, -: down
+    // you can see the lighting from below (- z value) if you lower per-feature opacity
+
+    //var lightdir = [-0.5, -0.6, 0.9];
     // NOTES FOR MYSELF
     // z: 0 is the minimum z; it clamps here. But
     //    0.5 is the first one that makes sense after 0.0 --
@@ -240,6 +251,9 @@ function drawExtrusion(painter, source, layer, coord) {
     if (rotateLight) mat3.fromRotation(lightMat, -painter.transform.angle);
     vec3.transformMat3(lightdir, lightdir, lightMat);
     gl.uniform3fv(program.u_lightdir, lightdir);
+
+    var lightColor = [0.75, 0.75, 1, 0.85];
+    gl.uniform4fv(program.u_lightcolor, lightColor);
 
     bucket.setUniforms(gl, 'extrusion', program, layer, {zoom: painter.transform.zoom});
 
