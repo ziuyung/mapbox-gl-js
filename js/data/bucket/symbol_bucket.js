@@ -5,7 +5,7 @@ var Point = require('point-geometry');
 var Bucket = require('../bucket');
 var Anchor = require('../../symbol/anchor');
 var getAnchors = require('../../symbol/get_anchors');
-var resolveTokens = require('../../util/token');
+var resolveStringValue = require('../../util/token');
 var Quads = require('../../symbol/quads');
 var Shaping = require('../../symbol/shaping');
 var resolveText = require('../../symbol/resolve_text');
@@ -223,7 +223,7 @@ SymbolBucket.prototype.populateBuffers = function(collisionTile, stacks, icons) 
         }
 
         if (layout['icon-image']) {
-            var iconName = resolveTokens(features[k].properties, layout['icon-image']);
+            var iconName = resolveStringValue(features[k].properties, layout['icon-image']);
             var image = icons[iconName];
             shapedIcon = shapeIcon(image, layout);
 
@@ -505,7 +505,7 @@ SymbolBucket.prototype.updateIcons = function(icons) {
     if (!iconValue) return;
 
     for (var i = 0; i < this.features.length; i++) {
-        var iconName = resolveTokens(this.features[i].properties, iconValue);
+        var iconName = resolveStringValue(this.features[i].properties, iconValue);
         if (iconName)
             icons[iconName] = true;
     }

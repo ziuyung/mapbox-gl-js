@@ -1,6 +1,6 @@
 'use strict';
 
-var resolveTokens = require('../util/token');
+var resolveStringValue = require('../util/token');
 
 module.exports = resolveText;
 
@@ -15,7 +15,7 @@ function resolveText(features, layoutProperties, codepoints) {
     var textFeatures = [];
 
     for (var i = 0, fl = features.length; i < fl; i++) {
-        var text = resolveTokens(features[i].properties, layoutProperties['text-field']);
+        var text = resolveStringValue(features[i].properties, layoutProperties['text-field']);
         if (!text) {
             textFeatures[i] = null;
             continue;
