@@ -223,7 +223,14 @@ SymbolBucket.prototype.populateBuffers = function(collisionTile, stacks, icons) 
         }
 
         if (layout['icon-image']) {
-            var iconName = resolveStringValue(features[k].properties, layout['icon-image']);
+            var iconNames = resolveStringValue(features[k].properties, layout['icon-image'], true);
+            var iconName = '';
+            for (var i = 0; i < iconNames.length; i++) {
+                if (iconNames[i] in icons) {
+                    iconName = iconNames[i];
+                    break;
+                }
+            }
             var image = icons[iconName];
             shapedIcon = shapeIcon(image, layout);
 
@@ -505,9 +512,10 @@ SymbolBucket.prototype.updateIcons = function(icons) {
     if (!iconValue) return;
 
     for (var i = 0; i < this.features.length; i++) {
-        var iconName = resolveStringValue(this.features[i].properties, iconValue);
-        if (iconName)
-            icons[iconName] = true;
+        var iconNames = resolveStringValue(this.features[i].properties, iconValue, true);
+        for (var j = 0; j < iconNames.length; j++) {
+            icons[iconNames[j]] = true;
+        }
     }
 };
 

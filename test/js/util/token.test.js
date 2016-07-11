@@ -105,9 +105,18 @@ test('token', function(t) {
         cases: [
             [{ref: 'name'}, ' (', {ref: ''}, ')'],
             [{ref: 'name'}, ' (', {ref: 'name_fr'}, ')'],
-            ['⚜', {ref: 'name'}]
+            [{ref: 'name'}]
         ]
     }));
+    t.deepEqual(['⚜Louisiane', '⚜Louisiana'], resolveStringValue({name: 'Louisiana', 'name_fr': 'Louisiane'}, {
+        type: 'selection',
+        cases: [
+            ['⚜', {ref: 'name_en'}],
+            ['⚜', {ref: 'name_fr'}],
+            ['⚜', {ref: 'name_lou'}],
+            ['⚜', {ref: 'name'}]
+        ]
+    }, true));
 
     t.end();
 });

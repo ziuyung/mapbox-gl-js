@@ -7,10 +7,12 @@ module.exports = resolveStringValue;
  *
  * @param {Object} properties a key/value relationship between tokens and replacements
  * @param {string|Object} value a template string or selection function object
- * @returns {string} the template with tokens replaced
+ * @param {boolean=false} all true to return each valid case in the selection function, with tokens replaced, instead of only the first one
+ * @returns {string|Array<string>} the string with tokens replaced; if `all`, then an array of such strings
  * @private
  */
-function resolveStringValue(properties, value) {
+function resolveStringValue(properties, value, all) {
+    var results = [];
     if (typeof value === 'string') {
         return value.replace(/{([^{}]+)}/g, function(match, ref) {
             return ref in properties ? properties[ref] : '';
@@ -20,11 +22,12 @@ function resolveStringValue(properties, value) {
         for (var i = 0; i < cases.length; i++) {
             var resolvedCase = resolveStringTemplate(properties, cases[i]);
             if (resolvedCase !== undefined) {
-                return resolvedCase;
+                results.push(resolvedCase);
+                if (!all) break;
             }
         }
     }
-    return '';
+    return all ? results : (results[0] ? results[0] : '');
 }
 
 /**
