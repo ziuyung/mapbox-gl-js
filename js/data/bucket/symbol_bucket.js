@@ -224,14 +224,13 @@ SymbolBucket.prototype.populateBuffers = function(collisionTile, stacks, icons) 
 
         if (layout['icon-image']) {
             var iconNames = resolveStringValue(features[k].properties, layout['icon-image'], true);
-            var iconName = '';
+            var image;
             for (var i = 0; i < iconNames.length; i++) {
                 if (iconNames[i] in icons) {
-                    iconName = iconNames[i];
+                    image = icons[iconNames[i]];
                     break;
                 }
             }
-            var image = icons[iconName];
             shapedIcon = shapeIcon(image, layout);
 
             if (image) {

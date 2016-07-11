@@ -14,9 +14,9 @@ module.exports = resolveStringValue;
 function resolveStringValue(properties, value, all) {
     var results = [];
     if (typeof value === 'string') {
-        return value.replace(/{([^{}]+)}/g, function(match, ref) {
+        results.push(value.replace(/{([^{}]+)}/g, function(match, ref) {
             return ref in properties ? properties[ref] : '';
-        });
+        }));
     } else if (typeof value === 'object' && value.type === 'selection') {
         var cases = value.cases;
         for (var i = 0; i < cases.length; i++) {
