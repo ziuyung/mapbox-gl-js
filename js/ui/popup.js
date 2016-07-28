@@ -178,7 +178,7 @@ Popup.prototype = util.inherit(Evented, /** @lends Popup.prototype */{
 
         var pos = this._map.project(this._lngLat).round(),
             anchor = this.options.anchor;
-
+        this.options.onUpdate && this.options.onUpdate(pos);
         if (!anchor) {
             var width = this._container.offsetWidth,
                 height = this._container.offsetHeight;
