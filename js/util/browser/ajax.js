@@ -1,5 +1,4 @@
 'use strict';
-
 exports.getJSON = function(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -25,21 +24,48 @@ exports.getJSON = function(url, callback) {
 };
 
 exports.getArrayBuffer = function(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.onerror = function(e) {
-        callback(e);
-    };
-    xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
-            callback(null, xhr.response);
-        } else {
-            callback(new Error(xhr.statusText));
-        }
-    };
-    xhr.send();
-    return xhr;
+    var win = {};
+    if(typeof window !== 'undefined')
+        win = window;
+    if((url.indexOf('assets/font')!=-1 || url.indexOf('assets/sprite') )&& win.resolveLocalFileSystemURL && win.cordova){
+        var ix = url.indexOf('#');
+        if(ix!=-1)
+            url = url.substring(0,ix);
+
+        win.resolveLocalFileSystemURL(win.cordova.file.applicationDirectory + "www/"+url, function (fileEntry) {
+            fileEntry.file(function(file) {
+                var reader = new FileReader();
+                reader.onloadend = function(e) {
+                    callback(null,this.result);
+                }
+                if(url.indexOf('.json')!=-1) {
+                    reader.readAsText(file);
+                }
+                else{
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+        }, function (err) {
+            callback(new Error(err));
+        });
+    }
+    else {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onerror = function (e) {
+            callback(e);
+        };
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
+                callback(null, xhr.response);
+            } else {
+                callback(new Error(xhr.statusText));
+            }
+        };
+        xhr.send();
+        return xhr;
+    }
 };
 
 function sameOrigin(url) {
