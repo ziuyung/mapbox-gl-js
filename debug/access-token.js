@@ -1,6 +1,7 @@
 mapboxgl.accessToken = getAccessToken();
 
 function getAccessToken() {
+    return 'pk.eyJ1Ijoiaml1eXVvbmciLCJhIjoiY2lxNWY3NDF3MDA1dGZoa2szenpwODhyZyJ9.lnu-2BeTQQIHKkFATxMPMQ';
     var accessToken = (
         process.env.MapboxAccessToken ||
         process.env.MAPBOX_ACCESS_TOKEN ||
