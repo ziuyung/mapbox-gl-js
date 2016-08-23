@@ -39,10 +39,6 @@ module.exports = function(style, options, _callback) {
 
     var gl = map.painter.gl;
 
-    map.on('error', function(event) {
-        callback(event.error);
-    });
-
     map.once('load', function() {
         applyOperations(map, options.operations, function() {
             var w = options.width * browser.devicePixelRatio;
@@ -69,7 +65,8 @@ module.exports = function(style, options, _callback) {
                 [];
 
             map.remove();
-            gl.destroy();
+            gl.getExtension('STACKGL_destroy_context').destroy();
+            delete map.painter.gl;
 
             callback(null, data, results.map(function (feature) {
                 feature = feature.toJSON();

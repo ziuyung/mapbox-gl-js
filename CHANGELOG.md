@@ -1,3 +1,76 @@
+## 0.22.1 (August 18 2016)
+
+#### New Features & Improvements
+
+ * Reduce library size by using minified version of style specification #2998
+ * Add a warning when rendering artifacts occur due to too many symbols or glyphs being rendered in a tile #2966
+
+#### Bugfixes
+
+ * Fix bug causing exception to be thrown by `Map#querySourceFeatures` #3022
+ * Fix bug causing `Map#loaded` to return true while there are outstanding tile updates #2847
+
+## 0.22.0 (August 11 2016)
+
+#### Breaking Changes
+
+ * The `GeoJSONSource`, `VideoSource`, `ImageSource` constructors are now private. Please use `map.addSource({...})` to create sources and `map.getSource(...).setData(...)` to update GeoJSON sources. #2667
+ * `Map#onError` has been removed. You may catch errors by listening for the `error` event. If no listeners are bound to `error`, error messages will be printed to the console. #2852
+
+#### New Features & Improvements
+
+ * Increase max glyph atlas size to accomodate alphabets with large numbers of characters #2930
+ * Add support for filtering features on GeoJSON / vector tile `$id` #2888
+ * Update geolocate icon #2973
+ * Add a `close` event to `Popup`s #2953
+ * Add a `offset` option to `Marker` #2885
+ * Print `error` events without any listeners to the console #2852
+ * Refactored `Source` interface to prepare for custom source types #2667
+
+#### Bugfixes
+
+ * Fix opacity property-functions for fill layers #2971
+ * Fix `DataCloneError` in Firefox and IE11 #2559
+ * Fix bug preventing camera animations from being triggered in `moveend` listeners #2944
+ * Fix bug preventing `fill-outline-color` from being unset #2964
+ * Fix webpack support #2887
+ * Prevent buttons in controls from acting like form submit buttons #2935
+ * Fix bug preventing map interactions near two controls in the same corner #2932
+ * Fix crash resulting for large style batch queue #2926
+
+## 0.21.0 (July 13 2016)
+
+#### Breaking Changes
+
+ * GeoJSON polygon inner rings are now rewound for compliance with the [v2 vector tile](https://github.com/mapbox/vector-tile-spec/blob/master/2.1/README.md#4344-polygon-geometry-type). This may affect some uses of `line-offset`, reversing the direction of the offset. #2889
+
+#### New Features & Improvements
+
+ * Add `text-pitch-alignment` style property #2668
+ * Allow query parameters on `mapbox://` URLs #2702
+ * Add `icon-text-fit` and `icon-text-fit-padding` style properties #2720
+ * Enable property functions for `icon-rotate` #2738
+ * Enable property functions for `fill-opacity` #2733
+ * Fire `Map#mouseout` events #2777
+ * Allow query parameters on all sprite URLs #2772
+ * Increase sprite atlas size to 1024px square, allowing more and larger sprites #2802
+ * Add `Marker` class #2725 #2810
+ * Add `{quadkey}` URL parameter #2805
+ * Add `circle-pitch-scale` style property #2821
+
+#### Bugfixes
+
+ * Fix rendering of layers with large numbers of features #2794
+ * Fix exceptions thrown during drag-rotate interactions #2840
+ * Fix error when adding and removing a layer within the same update cycle #2845
+ * Fix false "Geometry exceeds allowed extent" warnings #2568
+ * Fix `Map#loaded` returning true while there are outstanding tile updates #2847
+ * Fix style validation error thrown while removing a filter #2847
+ * Fix event data object not being passed for double click events #2814
+ * Fix multipolygons disappearing from map at certain zoom levels #2704
+ * Fix exceptions caused by `queryRenderedFeatures` in Safari and Firefox #2822
+ * Fix `mapboxgl#supported()` returning `true` in old versions of IE11 mapbox/mapbox-gl-supported#1
+
 ## 0.20.1 (June 21 2016)
 
 #### Bugfixes

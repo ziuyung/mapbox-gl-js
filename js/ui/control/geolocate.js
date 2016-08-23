@@ -11,10 +11,12 @@ var geoOptions = { enableHighAccuracy: false, timeout: 6000 /* 6sec */ };
 
 
 /**
- * Creates a geolocation control
+ * A `Geolocate` control provides a button that uses the browser's geolocation
+ * API to locate the user on the map. Extends [`Control`](#Control).
+ *
  * @class Geolocate
  * @param {Object} [options]
- * @param {string} [options.position='top-right'] A string indicating the control's position on the map. Options are `top-right`, `top-left`, `bottom-right`, `bottom-left`
+ * @param {string} [options.position='top-right'] A string indicating the control's position on the map. Options are `'top-right'`, `'top-left'`, `'bottom-right'`, and `'bottom-left'`.
  * @example
  * map.addControl(new mapboxgl.Geolocate({position: 'top-left'})); // position is optional
  */
@@ -36,6 +38,7 @@ Geolocate.prototype = util.inherit(Control, {
         this._container.addEventListener('contextmenu', this._onContextMenu.bind(this));
 
         this._geolocateButton = DOM.create('button', (className + '-icon ' + className + '-geolocate'), this._container);
+        this._geolocateButton.type = 'button';
         this._geolocateButton.addEventListener('click', this._onClickGeolocate.bind(this));
         return container;
     },
@@ -76,22 +79,22 @@ Geolocate.prototype = util.inherit(Control, {
 
 });
 
- /**
-  * geolocate event.
-  *
-  * @event geolocate
-  * @memberof Control
-  * @instance
-  * @property {EventData} data The returned Position object from the callback in [Geolocation.getCurrentPosition()](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition)
-  *
-  */
+/**
+ * geolocate event.
+ *
+ * @event geolocate
+ * @memberof Geolocate
+ * @instance
+ * @property {Position} data The returned [Position](https://developer.mozilla.org/en-US/docs/Web/API/Position) object from the callback in [Geolocation.getCurrentPosition()](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition).
+ *
+ */
 
- /**
-  * error event.
-  *
-  * @event error
-  * @memberof Control
-  * @instance
-  * @property {EventData} data The returned PositionError object from the callback in [Geolocation.getCurrentPosition()](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition)
-  *
-  */
+/**
+ * error event.
+ *
+ * @event error
+ * @memberof Geolocate
+ * @instance
+ * @property {PositionError} data The returned [PositionError](https://developer.mozilla.org/en-US/docs/Web/API/PositionError) object from the callback in [Geolocation.getCurrentPosition()](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition).
+ *
+ */

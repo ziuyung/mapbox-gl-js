@@ -5,7 +5,7 @@
     <meta charset='utf-8'>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-    <link rel='stylesheet' href='../dist/mapbox-gl.css' />
+    <link rel='stylesheet' href='/dist/mapbox-gl.css' />
     <style>
         body { margin: 0; padding: 0; }
         html, body, #map { height: 100%; }
@@ -49,8 +49,8 @@
     <em>Waiting for data...</em>
 </div>
 
-<script src='mapbox-gl.js'></script>
-<script src='access-token.js'></script>
+<script src='/dist/mapbox-gl-dev.js'></script>
+<script src='/debug/access-token-generated.js'></script>
 
 <script>
 var map = window.map = new mapboxgl.Map({
@@ -63,11 +63,12 @@ var map = window.map = new mapboxgl.Map({
 
 map.addControl(new mapboxgl.Navigation());
 map.addControl(new mapboxgl.Geolocate());
+map.addControl(new mapboxgl.Scale());
 
 map.on('load', function() {
     map.addSource('geojson', {
         "type": "geojson",
-        "data": "route.json"
+        "data": "/node_modules/mapbox-gl-test-suite/data/linestring.geojson"
     });
 
     map.addLayer({

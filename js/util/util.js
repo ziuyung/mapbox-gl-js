@@ -268,6 +268,7 @@ exports.debounce = function(fn, time) {
  */
 exports.bindAll = function(fns, context) {
     fns.forEach(function(fn) {
+        if (!context[fn]) { return; }
         context[fn] = context[fn].bind(context);
     });
 };
@@ -403,7 +404,7 @@ exports.deepEqual = function deepEqual(a, b) {
         }
         return true;
     }
-    if (typeof a === 'object') {
+    if (typeof a === 'object' && a !== null && b !== null) {
         if (!(typeof b === 'object')) return false;
         var keys = Object.keys(a);
         if (keys.length !== Object.keys(b).length) return false;
@@ -453,4 +454,61 @@ exports.warnOnce = function(message) {
         if (typeof console !== "undefined") console.warn(message);
         warnOnceHistory[message] = true;
     }
+};
+
+/**
+ * Indicates if the provided Points are in a counter clockwise (true) or clockwise (false) order
+ *
+ * @param {Point} a
+ * @param {Point} b
+ * @param {Point} c
+ *
+ * @returns {boolean} true for a counter clockwise set of points
+ */
+// http://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+exports.isCounterClockwise = function(a, b, c) {
+    return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
+};
+
+/**
+ * Returns the signed area for the polygon ring.  Postive areas are exterior rings and
+ * have a clockwise winding.  Negative areas are interior rings and have a counter clockwise
+ * ordering.
+ *
+ * @param {Array<Point>} ring - Exterior or interior ring
+ *
+ * @returns {number}
+ */
+exports.calculateSignedArea = function(ring) {
+    var sum = 0;
+    for (var i = 0, len = ring.length, j = len - 1, p1, p2; i < len; j = i++) {
+        p1 = ring[i];
+        p2 = ring[j];
+        sum += (p2.x - p1.x) * (p1.y + p2.y);
+    }
+    return sum;
+};
+
+/**
+ * Detects closed polygons, first + last point are equal
+ * @param {Array<Point>} points array of points
+ *
+ * @return {boolean} true if the points are a closed polygon
+ */
+exports.isClosedPolygon = function(points) {
+    // If it is 2 points that are the same then it is a point
+    // If it is 3 points with start and end the same then it is a line
+    if (points.length < 4)
+        return false;
+
+    var p1 = points[0];
+    var p2 = points[points.length - 1];
+
+    if (Math.abs(p1.x - p2.x) > 0 ||
+        Math.abs(p1.y - p2.y) > 0) {
+        return false;
+    }
+
+    // polygon simplification can produce polygons with zero area and more than 3 points
+    return (Math.abs(exports.calculateSignedArea(points)) > 0.01);
 };
